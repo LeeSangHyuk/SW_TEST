@@ -55,69 +55,33 @@
 
 using namespace std;
 
-vector<pair<int, int>> map[201];
-vector<int> dijjkstra(int start, int V){
-	vector<int> dist (V+1,INF);
-	dist[start] =0;
-	priority_queue<pair<int,int>> pq;
-	pq.push(make_pair(start,0));
-	while(!pq.empty()){
-		int current = pq.top().first;
-		int distance = -pq.top().second;
-		
-		pq.pop();
-		if(dist[current]<distance) continue;
-		for(int i=0;i<map[current].size();i++){
-			int next = map[current][i].first;
-			int nexDistance = distance +map[current][i].second;
-			if(nexDistance <dist[next]){
-				dist[next] = nexDistance;
-				pq.push(make_pair(next, -nexDistance));
+
+int solution(int n, int s, int a, int b, vector<vector<int>> fares) {
+    int answer = INF;
+	vector<vector<int>> map(n+1,vector<int>(n+1,INF));
+	for(int i=0;i<fares.size();i++){
+		map[fares[i][0]][fares[i][1]] = fares[i][2];
+		map[fares[i][1]][fares[i][0]] = fares[i][2];
+	}
+	
+	for(int i=1;i<=n;i++){
+		map[i][i] = 0;
+	}
+	for(int k= 1; k<=n;k++){
+		for(int i = 1; i<=n;i++){
+			for(int j=1;j<=n;j++){
+				if(map[i][j]>map[i][k] +map[k][j]){
+					map[i][j] = map[i][k]+map[k][j];
+				}
 			}
 		}
 	}
-
-	return dist;
-	
-}
-
-int solution(int n, int s, int a, int b, vector<vector<int>> fares) {
-    int answer = 0;
-	int Min = 10000000;
-	
-	for(int i=0;i<fares.size();i++){
-		map[fares[i][0]].push_back(make_pair(fares[i][1],fares[i][2]));
-		map[fares[i][1]].push_back(make_pair(fares[i][0],fares[i][2]));
-	}
 	for(int i=1;i<=n;i++){
-		for(int j =0;j<map[i].size();j++){
-			cout<< map[i][j].first<<"("<<map[i][j].second<<")" <<" ";
+		if(answer>map[s][i]+map[i][a]+map[i][b]){
+			answer = map[s][i]+map[i][a]+map[i][b];
 		}
-		cout<<endl;
-	}
-	vector<vector<int>> buff(1,vector<int>(n,0));
-	for(int i = 1;i<=n;i++){
-		buff.push_back(dijjkstra(i,n));
 	}
 	
-	for(int i=1;i<buff.size();i++){
-		for(int j =1;j<buff[i].size();j++){
-			cout<< buff[i][j] <<" ";
-		}
-		cout<<endl;
-	}
-	
-	for(int j =1 ;j<=n;j++){
-	
-		
-		if(Min>buff[s][j]+buff[j][a]+buff[j][b])
-		{
-			Min = buff[s][j]+buff[j][a]+buff[j][b];
-		}
-				
-	
-	}
-	answer = Min;
     return answer;
 }
 int main()
@@ -128,6 +92,6 @@ int main()
 	int b = 2;
 	vector<vector<int>> fares = {{4, 1, 10}, {3, 5, 24}, {5, 6, 2}, {3, 1, 41}, {5, 1, 24}, {4, 6, 50}, {2, 4, 66}, {2, 3, 22}, {1, 6, 25}};
 	
-	solution(n,s,a,b,fares);
+	cout<<solution(n,s,a,b,fares);
     return 0;
 }
