@@ -1,98 +1,97 @@
-/*상범빌딩*/
+/*벽 부수고 이동하기2*/
+/*
+- 걸린시간 1시간 15분(1시간 정도에 풀었지만, 계속된 오답에 반례를 확인하고 풀었다...
+- 오답 이유 : 벽 부수는 횟수를 큐에 넣고 돌리려 했지만, 반례로 visit 함수의 겹침이 생기는 경우가 있었음
+- 3차원 배열사용 필요
+*/
 #include <iostream>
+#include <cstdio>
 #include <vector>
 #include <queue>
 
+#define INF 9999999
 using namespace std;
 
-int L;
-int R;
-int C;
-int Min = 9999999;
-vector<vector<vector<char>>> map;
-vector<vector<vector<bool>>> check;
+int N;
+int M;
+int K;
+int Min = INF;
+int dir_x[4] = {0,-1,0,1};
+int dir_y[4] = {-1,0,1,0};
+
+vector<vector<int>> map;
+vector<vector<vector<bool>>> visit;
 
 typedef struct _point{
 	int x;
 	int y;
-	int z;
-	int time;
-
+	int move_cnt;
+	int break_cnt;
 
 }Point;
-
-Point dir[6] ={{0,-1,0},{-1,0,0},{0,1,0},{1,0,0},{0,0,1},{0,0,-1}};
-queue<Point> q;
 
 int main()
 {
 	freopen("input.txt", "r", stdin);
+	cin>>N;
+	cin>>M;
+	cin>>K;
 
-	while(1){
-		int time = 0;
-
-		cin >> L;
-		cin >> R;
-		cin >> C;
-		if(L==0 && R==0 && C==0){
-			break;
+	map.resize(N+1,vector<int>(M+1,-1));
+	visit.resize(K+1,vector<vector<bool>>(N+1,vector<bool>(M+1,true)));
+	queue<Point> q;
+	
+	for(int i=1;i<=N;i++){
+		for(int j=1;j<=M;j++){
+			scanf("%1d",&map[i][j]);
 		}
-		map.resize(L+1,vector<vector<char>>(R+1,vector<char>(C+1,0)));
-		check.resize(L+1,vector<vector<bool>>(R+1,vector<bool>(C+1,true)));
-		for(int z =1;z <=L;z++){
-			for(int x=1;x<=R;x++){
-				for(int y=1;y<=C;y++){
-					cin>>map[z][x][y];
-					if(map[z][x][y] == 'S'){
-						check[z][x][y] =false;
-						q.push({x,y,z,0});
-					}
-				}
+	}
+	visit[1][1][1] = false;
+	q.push({1,1,1,K});
+	
+	while(!q.empty()){
+		Point buff = q.front();
+		q.pop();
+		
+		if(buff.x==N && buff.y==M){
+			if(Min>buff.move_cnt){
+				Min = buff.move_cnt;
 			}
 		}
-
-		while(!q.empty()){
-			Point buff = q.front();
-			q.pop();
-
-			if(map[buff.z][buff.x][buff.y]=='E'){
-				if(Min>buff.time){
-					time = buff.time;
-				}
-
-			}
-			for(int i=0;i<6;i++){
-				int new_x = buff.x + dir[i].x;
-				int new_y = buff.y + dir[i].y;
-				int new_z = buff.z + dir[i].z;
-
-				if(new_x>=1 && new_x<=R && new_y>=1 &&new_y<=C && new_z>=1 && new_z<=L){
-					if(check[new_z][new_x][new_y] == true){
-						if(map[new_z][new_x][new_y] == '.' ||map[new_z][new_x][new_y] == 'E' ){	
-							check[new_z][new_x][new_y] = false;
-							q.push({new_x,new_y,new_z,buff.time+1});
-
-						}
+		for(int i=0;i<4;i++){
+			int new_x = buff.x + dir_x[i];
+			int new_y = buff.y + dir_y[i];
+			
+			if(new_x>=1 && new_x<=N && new_y>=1 && new_y<=M){
+				if(visit[buff.break_cnt][new_x][new_y]){
+					
+					if(map[new_x][new_y]==0){
+						q.push({new_x,new_y,buff.move_cnt+1,buff.break_cnt});
+						visit[buff.break_cnt][new_x][new_y]= false;
 					}
 					else{
-						continue;
+						if(buff.break_cnt!=0){
+							q.push({new_x,new_y,buff.move_cnt+1,buff.break_cnt-1});
+							visit[buff.break_cnt-1][new_x][new_y]= false;
+						}
+						
 					}
 				}
-
+				else{
+					continue;
+				}
 			}
 		}
-		if(time == 0){
-			cout<<"Trapped!"<<endl;
-		}
-		else{
-			cout<<"Escaped in "<<time<<" minute(s)."<<endl;
-		}
-
-		map.clear();
-		check.clear();
-		Min=9999999;
-
+		
 	}
+	if(Min == INF){
+		cout<< -1<<endl;
+	}
+	else{
+		cout<< Min<<endl;
+	}
+	
+	
 
     return 0;
 }
