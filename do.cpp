@@ -1,39 +1,55 @@
-/*BOJ 1912번 연속합*/
-/*
-DP[N] = Max(DP[N - 1] + Arr[i] , Arr[i])
-- 2차 배열 및 2중 for문을 사용하니 메모리 초과 및 시간 초과가 뜸
-- 점화식을 찾아내는 능력 필요
-*/
-
+/*파티_bOJ 1238*/
 #include <iostream>
 #include <vector>
-#include <algorithm>
-
+#define INF 999999
 using namespace std;
+
 int N;
-vector<int> dp;
-vector<int> map;
+int M;
+int X;
+int Max=0;
+vector<vector<int>> map;
 
 int main()
 {
 	freopen("input.txt", "r", stdin);
-	cin >> N;
-	map.resize(N+1,0);
-	dp.resize(N+1,0);
+	cin>>N;
+	cin>>M;
+	cin>>X;
+	map.resize(N+1,vector<int>(N+1,0));
+	
+	for(int i=1;i<=M;i++){
+		int x;
+		int y;
+		int value;
+		cin>>x;
+		cin>>y;
+		cin>>value;
+		map[x][y]=value;
+	}
+	for(int i=1;i<=N;i++){
+		for(int j=1;j<=N;j++){
+			if(i!=j && map[i][j]==0){
+				map[i][j]=INF;
+			}
+		}
+	}
+	
+	for(int k=1;k<=N;k++){
+		for(int i=1;i<=N;i++){
+			for(int j=1;j<=N;j++){
+				if(map[i][j]>map[i][k]+map[k][j]){
+					map[i][j] = map[i][k]+map[k][j];
+				}
+			}
+		}
+	}
 	
 	for(int i=1;i<=N;i++){
-		cin>>map[i];
+		if(Max<map[i][X]+map[X][i]){
+			Max= map[i][X]+map[X][i];
+		}
 	}
-	
-	dp[1] = map[1];
-	int answer = dp[1];
-		
-	for(int i=2;i<=N;i++){
-		dp[i] = max(map[i],dp[i-1]+map[i]);
-		answer = max(answer,dp[i]);
-	}
-	
-	cout<<answer;
-
+	cout<<Max<<endl;
     return 0;
 }
