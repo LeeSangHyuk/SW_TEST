@@ -1,6 +1,10 @@
-/*파티_bOJ 1238*/
+/*파티_bOJ 1238
+다익스트라로 풀음
+first를 음수로! 간선의 값이 작은것부터!
+*/
 #include <iostream>
 #include <vector>
+#include <queue>
 #define INF 999999
 using namespace std;
 
@@ -8,7 +12,36 @@ int N;
 int M;
 int X;
 int Max=0;
-vector<vector<int>> map;
+vector<pair<int,int>> map[1001];
+
+void dijkstra(int start,vector<int>&dist){
+	dist[start] = 0;
+	priority_queue<pair<int,int>> pq;
+	pq.push({0,start});
+	
+	while(!pq.empty()){
+		int distance = -pq.top().first;
+		int current =pq.top().second;
+
+		pq.pop();
+		
+		if (dist[current]<distance) continue;
+		
+		for(int i=0;i<map[current].size();i++){
+			int next_distance = map[current][i].first;
+			int next = map[current][i].second+ distance;
+			
+			if(next_distance<dist[next]){
+				dist[next] = next_distance;
+				pq.push({-next_distance,next});	
+			}
+		}
+	}
+	cout<<endl;
+	
+	
+}
+
 
 int main()
 {
@@ -16,7 +49,7 @@ int main()
 	cin>>N;
 	cin>>M;
 	cin>>X;
-	map.resize(N+1,vector<int>(N+1,0));
+	
 	
 	for(int i=1;i<=M;i++){
 		int x;
@@ -25,31 +58,23 @@ int main()
 		cin>>x;
 		cin>>y;
 		cin>>value;
-		map[x][y]=value;
+		map[x].push_back({y,value});	
+		
+		
 	}
-	for(int i=1;i<=N;i++){
-		for(int j=1;j<=N;j++){
-			if(i!=j && map[i][j]==0){
-				map[i][j]=INF;
-			}
-		}
-	}
-	
-	for(int k=1;k<=N;k++){
-		for(int i=1;i<=N;i++){
-			for(int j=1;j<=N;j++){
-				if(map[i][j]>map[i][k]+map[k][j]){
-					map[i][j] = map[i][k]+map[k][j];
-				}
-			}
-		}
-	}
+
+	vector<int> dist(N+1,INF);
+	dijkstra(X,dist);
 	
 	for(int i=1;i<=N;i++){
-		if(Max<map[i][X]+map[X][i]){
-			Max= map[i][X]+map[X][i];
+		vector<int> dist2(N+1,INF);
+		dijkstra(i,dist2);
+		
+		if(Max<dist2[X]+dist[i]){
+			Max= dist2[X]+dist[i];
 		}
+		dist2.clear();
 	}
-	cout<<Max<<endl;
+	cout<<Max;
     return 0;
 }
