@@ -1,80 +1,94 @@
-/*파티_bOJ 1238
-다익스트라로 풀음
-first를 음수로! 간선의 값이 작은것부터!
+/*알고리즘 공부 BOJ 17942
+- 1시간 반 정도 풀다가 답지 봄
+- 다익스트라의 응용
+- 공부량이 적은 알고리즘 부터 ㄱㄱ
+- auto 의 사용법 확인
+- priority_queue 의 사용법 다시 확인
 */
+
 #include <iostream>
 #include <vector>
 #include <queue>
-#define INF 999999
+
 using namespace std;
 
 int N;
 int M;
-int X;
-int Max=0;
-vector<pair<int,int>> map[1001];
+int R;
 
-void dijkstra(int start,vector<int>&dist){
-	dist[start] = 0;
-	priority_queue<pair<int,int>> pq;
-	pq.push({0,start});
-	
-	while(!pq.empty()){
-		int distance = -pq.top().first;
-		int current =pq.top().second;
-
-		pq.pop();
-		
-		if (dist[current]<distance) continue;
-		
-		for(int i=0;i<map[current].size();i++){
-			int next_distance = map[current][i].first;
-			int next = map[current][i].second+ distance;
-			
-			if(next_distance<dist[next]){
-				dist[next] = next_distance;
-				pq.push({-next_distance,next});	
-			}
-		}
-	}
-	cout<<endl;
-	
-	
-}
+vector<int> study_size;
 
 
 int main()
 {
 	freopen("input.txt", "r", stdin);
-	cin>>N;
-	cin>>M;
-	cin>>X;
-	
-	
-	for(int i=1;i<=M;i++){
-		int x;
-		int y;
-		int value;
-		cin>>x;
-		cin>>y;
-		cin>>value;
-		map[x].push_back({y,value});	
-		
-		
-	}
-
-	vector<int> dist(N+1,INF);
-	dijkstra(X,dist);
+	cin >>N;
+	cin>> M;
+	study_size.resize(N+1);
 	
 	for(int i=1;i<=N;i++){
-		vector<int> dist2(N+1,INF);
-		dijkstra(i,dist2);
-		
-		if(Max<dist2[X]+dist[i]){
-			Max= dist2[X]+dist[i];
-		}
-		dist2.clear();
+		cin>>study_size[i];
 	}
-	cout<<Max;
+	
+	cin>>R;
+	
+	vector<vector<pair<int,int>>> map(N+1);
+	
+	for(int i=0;i<R;i++){
+		int from,to,sub_size;
+		cin>>from;
+		cin>>to;
+		cin>>sub_size;
+		map[from].push_back({to,sub_size});
+		
+	}
+	
+	priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> pq;
+	
+	vector<bool> visit(N+1,false);
+	
+	for(int i=1;i<=N;i++){
+		pq.push({study_size[i],i});
+	}
+	
+	
+	int ans = -1, cnt =0;
+
+	while(!pq.empty() && cnt<M){
+		pair<int,int> buff = pq.top();
+		
+		int cost = buff.first;
+		int node = buff.second;
+		
+		pq.pop();
+		if(visit[node]) continue;
+		cnt++;
+		visit[node] =true;
+		
+		if(ans<cost){
+			ans = cost;
+		}
+		
+		for(int j =0;j<map[node].size();j++){
+			int next_node = map[node][j].first;
+			int next_cost = map[node][j].second;
+		
+			
+			if(visit[next_node]==true) continue;
+			if(study_size[next_node] >= next_cost){
+				study_size[next_node]=study_size[next_node]-next_cost;
+			}
+			else{
+				study_size[next_node]= 0;
+			}
+			pq.push({study_size[next_node],next_node});
+
+		}
+		
+	}
+	
+	cout<< ans<<endl;
+	
+	
     return 0;
 }
